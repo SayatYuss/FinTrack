@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Мои транзакции</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+            navigator.serviceWorker.register("/service-worker.js")
+                .then((reg) => console.log("Service Worker зарегистрирован!", reg))
+                .catch((err) => console.log("Ошибка при регистрации Service Worker", err));
+        });
+    }
+</script>
+
+<body class="d-flex flex-column min-vh-100">
+
+<header th:insert="~{blocks/header}"></header>
+
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center flex-grow-1">
+    <div class="card shadow-lg p-4 rounded-3 w-100" style="max-width: 900px;">
+        <h2 class="text-center mb-4">Мои транзакции</h2>
+
+        <!-- Фильтр и кнопка добавления -->
+        <div class="d-flex flex-wrap justify-content-between mb-3 gap-2">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/transactions" class="btn btn-secondary">Все</a>
+                <a href="?type=income" class="btn btn-success">Доходы</a>
+                <a href="?type=expense" class="btn btn-danger">Расходы</a>
+            </div>
+            <a th:href="@{/transactions/add}" class="btn btn-primary">Добавить транзакцию</a>
+        </div>
+
+        <!-- Таблица транзакций -->
+        <div class="table-responsive">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                <tr>
+                    <th>Дата</th>
+                    <th>Категория</th>
+                    <th>Сумма</th>
+                    <th>Тип</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="transaction : ${transactions}">
+                    <td th:text="${transaction.date}"></td>
+                    <td th:text="${transaction.category}"></td>
+                    <td th:text="${transaction.amount}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${transaction.type.name() == 'INCOME' ? 'bg-success' : 'bg-danger'}">
+                            <th:block th:switch="${transaction.type.name()}">
+                                <span th:case="'INCOME'">Доход</span>
+                                <span th:case="'EXPENSE'">Расход</span>
+                                <span th:case="*">Неизвестно</span>
+                            </th:block>
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/transactions/delete/{id}(id=${transaction.id})}"
+                           class="btn btn-sm btn-outline-danger">
+                            Удалить
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
